@@ -80,7 +80,7 @@ def search(quer, limit=200):
     """ Call sat api and return s2 scenes"""
     req = '%s?satellite_name=sentinel-2&%s&limit=%s' % \
     (sat_api_url, quer, limit)
-    print req
+    #print req
     r = requests.get(req)
 
     r_dict = json.loads(r.text)
@@ -158,7 +158,7 @@ def cli():
     help='Set the path where the file will be saved.')
 
 def worker(lat, lon, cloud, start_date, end_date, buffer, taskid, ndvi, path):
-    """ Create animated GIF from landsat 8 data"""
+    """ Create animated GIF from Sentinel 2 data"""
 
     #Test 
     #lat lon has to be defined, path_row not supported
@@ -168,22 +168,22 @@ def worker(lat, lon, cloud, start_date, end_date, buffer, taskid, ndvi, path):
 
     #Query Scenes
     print
-    print "Building Landsat-API request"
-    landsat_query = query_builder(lat=lat, lon=lon, start_date=start_date, end_date=end_date, cloud_max=cloud)
-    print landsat_query
-    print "Searching Landsat 8 images"
-    candidate_scenes = search(landsat_query)
+    print "Building SAT-API request"
+    sentinel_query = query_builder(lat=lat, lon=lon, start_date=start_date, end_date=end_date, cloud_max=cloud)
+    #print sentinel_query
+    print "Searching Sentinel 2 images"
+    candidate_scenes = search(sentinel_query)
     #pprint.pprint(candidate_scenes)
 
     if not candidate_scenes.has_key('results'):
-        print "Landsat-API Querry returned with 'Not Found message'"
+        print "SAT-API Query returned with 'Not Found message'"
         sys.exit(1)
         
     im2process = candidate_scenes['results']
     all_ids = [i['sceneID'] for i in im2process]
     
-    print '{} Landsat scene found'.format(len(all_ids))
-    print 'landsat ids: {}'.format(", ".join(all_ids))
+    print '{} Sentinel scenes found'.format(len(all_ids))
+    print 'sentinel ids: {}'.format(", ".join(all_ids))
 
     #Construct AOI  (square in WebMercator)
     wgs = osr.SpatialReference()  
@@ -206,7 +206,7 @@ def worker(lat, lon, cloud, start_date, end_date, buffer, taskid, ndvi, path):
     aoi.Transform(wmTowgs) #Transform AOI in WGS84
     pt = pol = polB = None
     
-    print "Excluding Landsat 8 scenes not covering the Entire AOI and not TOA if NDVI is requested"
+    print "Excluding Sentinel 2 scenes not covering the Entire AOI and not TOA if NDVI is requested"
     proc_images = []
     for ii in range(len(im2process)):
         imgMeta = im2process[ii]
@@ -251,10 +251,10 @@ def worker(lat, lon, cloud, start_date, end_date, buffer, taskid, ndvi, path):
         for ii in range(len(proc_images)):
              
             im = proc_images[ii]
-            print 'Processing Landsat image {}'.format(im['sceneID'])
+            print 'Processing Sentinel image {}'.format(im['sceneID'])
             
             out_im = os.path.join(workdir, '{}.tif'.format(im['date']))
-            print out_im
+            #print out_im
 
             try:
                 WRSPath = im['path']
@@ -345,7 +345,7 @@ def worker(lat, lon, cloud, start_date, end_date, buffer, taskid, ndvi, path):
             except:
                 #print "Unexpected error", sys.exc_info()[0]
                 #raise
-                print 'Failed to process Landsat image {}'.format(im['sceneID'])
+                print 'Failed to process Sentinel image {}'.format(im['sceneID'])
 
         if len(date_array) > 0:
             #Sort image by date and rename with number
