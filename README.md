@@ -7,10 +7,13 @@ Data is read from Amazon server.
 
 NDVI option still needs validation.
 
-See issues for error messages that might be displayed while using tool.
-
 Example
 -------
 
 ###### Rio de Janeiro (RGB)
 ![](/img/Rio_de_Janeiro.gif)
+
+Requires
+--------
+
+GDAL 2.2.0 to remove errors and warning messages, see issues #1 and #2.
